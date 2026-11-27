@@ -18,26 +18,31 @@
 <section class="agenda-card" aria-label="Calendário">
 <div class="month"><button type="button" id="prev" aria-label="Mês anterior">‹</button><h2 id="month"></h2><button type="button" id="next" aria-label="Próximo mês">›</button></div>
 <div id="calendar" class="calendar"></div><p id="calendar-status" role="status"></p>
-<p class="legend"><span>Disponível</span><span>Reservado</span></p>
+<ul class="legend" aria-label="Legenda do calendário"><li class="is-free">Livre</li><li class="is-reserved">Reservada</li><li class="is-past">Já passou</li></ul>
 </section>
 <section class="agenda-card" aria-label="Solicitar reserva">
 <h2 id="selection">Selecione uma data</h2>
 <p id="notice" role="status"></p>
 <div id="auth">
-<p>Entre para solicitar uma reserva.</p>
+<section id="login-panel" aria-label="Entrar"><p>Entre para solicitar uma reserva.</p>
 <form id="login">
 <label>E-mail<input required type="email" name="email" autocomplete="email"></label>
 <label>Senha<input required type="password" name="password" autocomplete="current-password"></label>
 <button class="button lime">Entrar</button>
 </form>
-<details><summary>Criar conta</summary>
+<button type="button" class="button outline" id="show-signup">Criar conta</button>
+</section>
+<section id="signup-panel" aria-label="Criar conta" hidden>
+<h3>Criar conta</h3>
 <form id="signup">
 <label>Nome<input required name="name" minlength="2" maxlength="100" autocomplete="name"></label>
 <label>WhatsApp<input required type="tel" name="phone" minlength="10" maxlength="20" autocomplete="tel"></label>
 <label>E-mail<input required type="email" name="email" autocomplete="email"></label>
 <label>Senha<input required type="password" name="password" minlength="8" autocomplete="new-password"></label>
 <button class="button outline">Cadastrar</button>
-</form></details>
+</form>
+<button type="button" class="button outline" id="show-login">Voltar para o login</button>
+</section>
 </div>
 <div id="account" hidden>
 <form id="request">

@@ -51,11 +51,18 @@ async function renderCalendar() {
     const key = dateKey(new Date(Date.UTC(year,index,day)));
     const button = document.createElement('button');
     button.textContent = day;
-    const taken = occupied.has(key);
+    const state = key < today ? 'past' : occupied.has(key) ? 'reserved' : key > limit ? 'unavailable' : 'free';
+    const labels = { past: 'Já passou', reserved: 'Reservada', unavailable: 'Fora do prazo', free: 'Livre' };
     button.dataset.date = key;
-    button.disabled = taken || key<today || key>limit;
-    button.classList.toggle('occupied',taken);
-    button.setAttribute('aria-label',dateLabel(key)+(taken ? ', reservado' : ''));
+    button.disabled = state !== 'free';
+    button.classList.add('is-' + state);
+    button.setAttribute('aria-label', dateLabel(key) + ', ' + labels[state]);
+    if (state !== 'unavailable') {
+      const label = document.createElement('span');
+      label.textContent = labels[state];
+      label.setAttribute('aria-hidden', 'true');
+      button.append(label);
+    }
     button.addEventListener('click',()=>selectDate(key));
     grid.append(button);
   }
@@ -69,6 +76,15 @@ function moveMonth(step) {
 }
 byId('prev').onclick = () => moveMonth(-1);
 byId('next').onclick = () => moveMonth(1);
+
+function showAuthForm(signup) {
+  byId('login-panel').hidden = signup;
+  byId('signup-panel').hidden = !signup;
+  notice.textContent = '';
+  byId(signup ? 'signup' : 'login').querySelector('input').focus();
+}
+byId('show-signup').onclick = () => showAuthForm(true);
+byId('show-login').onclick = () => showAuthForm(false);
 
 const values = (form) => Object.fromEntries(new FormData(form));
 function submit(id, action) {
