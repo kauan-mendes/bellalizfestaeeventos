@@ -82,6 +82,7 @@ byId('prev').onclick = () => moveMonth(-1);
 byId('next').onclick = () => moveMonth(1);
 
 function showAuthForm(signup) {
+  byId('confirm-panel').hidden = true;
   byId('login-panel').hidden = signup;
   byId('signup-panel').hidden = !signup;
   notice.textContent = '';
@@ -89,6 +90,7 @@ function showAuthForm(signup) {
 }
 byId('show-signup').onclick = () => showAuthForm(true);
 byId('show-login').onclick = () => showAuthForm(false);
+byId('confirm-login').onclick = () => showAuthForm(false);
 
 const values = (form) => Object.fromEntries(new FormData(form));
 function submit(id, action) {
@@ -108,9 +110,25 @@ submit('login',async ({email,password},form)=>{
   if(!error) form.reset();
 });
 submit('signup',async ({email,password,name,phone},form)=>{
-  const {error}=await db.auth.signUp({email,password,options:{data:{name,phone},emailRedirectTo:location.origin+'/agenda.html'}});
-  notice.textContent=error?'Não foi possível cadastrar. Confira os dados e tente novamente.':'Confira seu e-mail para confirmar a conta.';
-  if(!error) form.reset();
+  const {data,error}=await db.auth.signUp({email,password,options:{data:{name,phone},emailRedirectTo:location.origin+'/agenda.html'}});
+  if (error) {
+    notice.textContent = 'Não foi possível cadastrar. Confira os dados e tente novamente.';
+    notice.scrollIntoView({block:'nearest'});
+    return;
+  }
+  form.reset();
+  if (data.session) {
+    notice.textContent = 'Conta criada. Você já pode solicitar uma reserva.';
+    return;
+  }
+  notice.textContent = '';
+  byId('login-panel').hidden = true;
+  byId('signup-panel').hidden = true;
+  byId('confirm-address').textContent = email.trim();
+  const panel = byId('confirm-panel');
+  panel.hidden = false;
+  byId('confirm-title').focus({preventScroll:true});
+  panel.scrollIntoView({block:'nearest'});
 });
 byId('logout').onclick=async()=>{const {error}=await db.auth.signOut();notice.textContent=error?'Não foi possível sair.':'';};
 
