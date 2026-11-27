@@ -82,6 +82,7 @@ byId('prev').onclick = () => moveMonth(-1);
 byId('next').onclick = () => moveMonth(1);
 
 function showAuthForm(signup) {
+  byId('login-error').hidden = true;
   byId('confirm-panel').hidden = true;
   byId('login-panel').hidden = signup;
   byId('signup-panel').hidden = !signup;
@@ -104,10 +105,47 @@ function submit(id, action) {
     finally { button.disabled = id === 'request' && !chosen; }
   });
 }
-submit('login',async ({email,password},form)=>{
-  const {error}=await db.auth.signInWithPassword({email,password});
-  notice.textContent=error?'Confira o e-mail, a senha e a confirmação do cadastro.':'Sessão iniciada.';
-  if(!error) form.reset();
+const loginError = byId('login-error');
+const loginErrors = {
+  invalid_credentials: 'E-mail ou senha incorretos. Confira os dados e tente novamente.',
+  email_not_confirmed: 'Confirme seu e-mail antes de entrar. Confira também a pasta de spam.',
+  over_request_rate_limit: 'Muitas tentativas de login. Aguarde um pouco e tente novamente.'
+};
+
+function showLoginError(message) {
+  loginError.textContent = message;
+  loginError.hidden = false;
+  loginError.focus();
+}
+
+submit('login', async ({email, password}, form) => {
+  loginError.hidden = true;
+  loginError.textContent = '';
+  notice.textContent = '';
+  const emailInput = form.elements.email;
+  const passwordInput = form.elements.password;
+  emailInput.value = email.trim();
+
+  if (!emailInput.validity.valid || !passwordInput.validity.valid) {
+    showLoginError('Digite um e-mail válido e preencha a senha para entrar.');
+    return;
+  }
+
+  const button = form.querySelector('button');
+  button.textContent = 'Entrando…';
+  try {
+    const {error} = await db.auth.signInWithPassword({email: emailInput.value, password});
+    if (error) {
+      showLoginError(loginErrors[error.code] ?? 'Não foi possível entrar. Tente novamente em instantes.');
+      return;
+    }
+    notice.textContent = 'Sessão iniciada.';
+    form.reset();
+  } catch {
+    showLoginError('Falha de conexão. Tente entrar novamente em instantes.');
+  } finally {
+    button.textContent = 'Entrar';
+  }
 });
 submit('signup',async ({email,password,name,phone},form)=>{
   const {data,error}=await db.auth.signUp({email,password,options:{data:{name,phone},emailRedirectTo:location.origin+'/agenda.html'}});

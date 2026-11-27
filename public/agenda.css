@@ -53,3 +53,15 @@
 }
 .confirm-panel p + p { margin-top: 10px; }
 .confirm-panel .button { margin-top: 16px; }
+
+.login-error {
+  margin: 0 0 4px;
+  padding: 12px 14px;
+  border: 1px solid #b24444;
+  border-left-width: 4px;
+  border-radius: 8px;
+  background: #fff0ef;
+  color: #752121;
+  font-weight: 700;
+}
+.login-error:focus-visible { outline: 2px solid #b24444; outline-offset: 2px; }
