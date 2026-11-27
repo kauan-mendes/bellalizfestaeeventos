@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Agenda | Espaço Bella Liz</title>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="agenda.css">
+<script type="module" src="agenda.js"></script>
+</head>
+<body>
+<header class="wrap header"><a class="brand" href="./">Bella Liz <small>Festas &amp; Eventos</small></a><a class="button outline" href="./">Voltar ao site</a></header>
+<main class="wrap agenda">
+<div><p class="eyebrow">Reservas</p><h1>Escolha sua data</h1><p>Um evento por dia, das 10h às 21h.</p></div>
+<div class="agenda-grid">
+<section class="agenda-card" aria-label="Calendário">
+<div class="month"><button type="button" id="prev" aria-label="Mês anterior">‹</button><h2 id="month"></h2><button type="button" id="next" aria-label="Próximo mês">›</button></div>
+<div id="calendar" class="calendar"></div><p id="calendar-status" role="status"></p>
+<p class="legend"><span>Disponível</span><span>Reservado</span></p>
+</section>
+<section class="agenda-card" aria-label="Solicitar reserva">
+<h2 id="selection">Selecione uma data</h2>
+<p id="notice" role="status"></p>
+<div id="auth">
+<p>Entre para solicitar uma reserva.</p>
+<form id="login">
+<label>E-mail<input required type="email" name="email" autocomplete="email"></label>
+<label>Senha<input required type="password" name="password" autocomplete="current-password"></label>
+<button class="button lime">Entrar</button>
+</form>
+<details><summary>Criar conta</summary>
+<form id="signup">
+<label>Nome<input required name="name" minlength="2" maxlength="100" autocomplete="name"></label>
+<label>WhatsApp<input required type="tel" name="phone" minlength="10" maxlength="20" autocomplete="tel"></label>
+<label>E-mail<input required type="email" name="email" autocomplete="email"></label>
+<label>Senha<input required type="password" name="password" minlength="8" autocomplete="new-password"></label>
+<button class="button outline">Cadastrar</button>
+</form></details>
+</div>
+<div id="account" hidden>
+<form id="request">
+<label>Nome<input required name="contact_name" minlength="2" maxlength="100"></label>
+<label>WhatsApp<input required type="tel" name="phone" minlength="10" maxlength="20"></label>
+<label>Tipo de evento<input required name="event_type" maxlength="80"></label>
+<label>Número de convidados<input required name="guests" type="number" min="1" max="10000"></label>
+<button class="button lime" id="send" disabled>Solicitar reserva</button>
+</form>
+<button class="button outline" id="logout">Sair</button>
+</div>
+</section>
+</div>
+<section class="agenda-card" id="requests" hidden>
+<h2 id="list-title">Minhas solicitações</h2>
+<button class="button outline" id="block" hidden disabled>Bloquear data selecionada</button>
+<div id="list"></div>
+</section>
+</main>
+</body>
+</html>
