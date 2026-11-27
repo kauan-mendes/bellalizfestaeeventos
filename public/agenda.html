@@ -7,8 +7,10 @@
 <link rel="icon" type="image/webp" href="logo-bella-liz.webp">
 <link rel="stylesheet" href="style.css">
 <link rel="stylesheet" href="bella-viva.css">
+<link rel="stylesheet" href="aviso.css">
 <link rel="stylesheet" href="agenda.css">
 <script type="module" src="agenda.js"></script>
+<script src="aviso.js" defer></script>
 </head>
 <body>
 <header class="wrap header"><a class="brand" href="./"><img src="logo-bella-liz.webp" alt="Espaço Bella Liz Festas e Eventos"></a><a class="button outline" href="./">Voltar ao site</a></header>
@@ -56,7 +58,23 @@
 <form id="request">
 <label>Nome<input required name="contact_name" minlength="2" maxlength="100"></label>
 <label>WhatsApp<input required type="tel" name="phone" minlength="10" maxlength="20"></label>
-<label>Tipo de evento<input required name="event_type" maxlength="80"></label>
+<label>Tipo de evento
+<select id="event-type" name="event_type" required>
+  <option value="">Selecione o tipo de evento</option>
+  <option>Casamento</option>
+  <option>Aniversário</option>
+  <option>Aniversário infantil</option>
+  <option>Confraternização</option>
+  <option>Batismo</option>
+  <option>Evento de igreja</option>
+  <option>Chá de bebê</option>
+  <option>Chá revelação</option>
+  <option>Almoço em família</option>
+  <option value="other">Outro</option>
+</select></label>
+<label id="event-other-label" hidden>Qual é o tipo de evento?
+  <input id="event-other" name="event_other" maxlength="80" disabled>
+</label>
 <label>Número de convidados<input required name="guests" type="number" min="1" max="10000"></label>
 <button class="button lime" id="send" disabled>Solicitar reserva</button>
 </form>

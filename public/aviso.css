@@ -1,0 +1,12 @@
+.footer .footer-instagram {background:var(--lime);color:var(--ink);border-color:var(--ink)}
+.footer .footer-instagram:hover {background:var(--ink);color:white}
+.footer-contacts {display:grid;gap:4px}
+.footer-contacts a {display:flex;align-items:center;min-height:44px;text-decoration:underline!important;text-underline-offset:4px}
+.rental-notice {width:min(460px,calc(100% - 32px));background:var(--paper);color:var(--ink);border:1px solid var(--line);border-top:6px solid var(--lime);padding:clamp(18px,5vw,32px)}
+.rental-notice h2 {font:800 clamp(1.5rem,5vw,2rem)/1.1 var(--serif);margin:0 0 12px}
+.rental-notice p {font-size:1.05rem;margin:0 0 20px}
+#event-type {display:block;width:100%;min-height:44px;border:1px solid var(--line);border-radius:8px;background:white;color:var(--ink);padding:8px;font:inherit}
+@media(max-width:620px) {
+  .footer .footer-instagram {width:100%}
+  .footer-contacts {width:100%}
+}

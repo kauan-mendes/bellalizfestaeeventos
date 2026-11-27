@@ -301,7 +301,26 @@ async function saveRequest(entry) {
   notice.textContent=error?.code==='23505'?'Já existe um pedido seu ou um bloqueio para essa data.':error?.message==='Esta data já está indisponível.'?error.message:error?'Não foi possível salvar. Confira os dados e tente novamente.':entry.status==='blocked'?'Data bloqueada.':'Solicitação enviada. Aguarde a confirmação.';
   await Promise.all([loadRequests(),renderCalendar()]);
 }
-submit('request', (entry)=>saveRequest({...entry,guests:Number(entry.guests)}));
+const eventType = byId('event-type');
+const otherEvent = byId('event-other');
+eventType.addEventListener('change', () => {
+  const isOther = eventType.value === 'other';
+  byId('event-other-label').hidden = !isOther;
+  otherEvent.disabled = !isOther;
+  otherEvent.required = isOther;
+  otherEvent.setCustomValidity('');
+});
+otherEvent.addEventListener('input', () => otherEvent.setCustomValidity(''));
+
+submit('request', ({event_other, event_type, ...entry}) => {
+  const description = event_type === 'other' ? (event_other ?? '').trim() : event_type;
+  if (!description) {
+    otherEvent.setCustomValidity('Escreva o tipo de evento.');
+    otherEvent.reportValidity();
+    return;
+  }
+  return saveRequest({...entry, event_type: description, guests:Number(entry.guests)});
+});
 byId('block').onclick=async()=>{byId('block').disabled=true;await saveRequest({status:'blocked',event_type:'Bloqueio administrativo',guests:1,contact_name:'Bella Liz',phone:'0000000000'});};
 
 db.auth.onAuthStateChange((_event,session)=>{
