@@ -1,0 +1,58 @@
+:root {
+  --paper:#fff8e9;
+  --ink:#292038;
+  --green:#08706a;
+  --lime:#ffcb44;
+  --line:#e6d5bc;
+  --serif:"Bricolage Grotesque", "Trebuchet MS", system-ui, sans-serif;
+  --coral:#ef6d3e;
+  --aqua:#e3f6ed;
+}
+.header {min-height:108px}
+.brand img {width:clamp(112px,13vw,174px);height:76px;object-fit:contain}
+.header nav a:hover,.footer a:hover {color:#9c361c}
+.button {transition:background .18s,color .18s; min-height:48px}
+.button.lime {background:var(--lime);color:#2d2232}
+.button.lime:hover {background:#ffe267}
+.hero {grid-template-columns:46% 54%;min-height:540px;background:#ffe08a;color:var(--ink);border:1px solid #f1c560;isolation:isolate}
+.hero-copy {position:relative;padding:clamp(30px,4.5vw,65px)}
+.hero-copy::before {content:"";position:absolute;inset:0;z-index:-1;background:radial-gradient(circle at 14% 80%,#fff4bb 0,transparent 62%);pointer-events:none}
+.hero .eyebrow {color:#65431d}
+.hero h1,.agenda h1 {font-weight:800;letter-spacing:-.065em;line-height:.96}
+.hero h1 {font-size:clamp(3rem,5.6vw,6rem)}
+h1 em,h2 em {font-style:normal}
+.hero h1 em {color:#ae381f}
+.hero .lime {background:var(--ink);color:white}
+.hero .lime:hover {background:#463853}
+.hero-photo figcaption {background:#fff8e9}
+.section-heading h2,.visit h2,.booking h2 {font-weight:800;letter-spacing:-.06em;line-height:1}
+.section-heading h2 em,.visit h2 em {color:#a83a20;font-weight:800}
+.structure {align-items:center}
+.features {display:grid;gap:10px}
+.features article,.features article:last-child {padding:15px 18px;border:0;border-radius:14px;background:#ffe6a1}
+.features article:nth-child(2) {background:#ffddd0}
+.features article:nth-child(3) {background:var(--aqua)}
+.features h3 {font-size:1.3rem;font-weight:800}
+.gallery {background:var(--aqua)}
+.photos a:first-child {grid-column:span 2}
+.photos a:nth-child(2) {aspect-ratio:1.14}
+.photos a {border-radius:18px}
+.photos span {background:#292038ee}
+.booking {background:#31253e;color:#fff8e9}
+.booking h2 em {color:#ffcb44;font-weight:800}
+.agenda .agenda-card {background:#fffdf6}
+@media(max-width:850px) {
+  .header nav {gap:12px}
+  .hero {min-height:460px}
+}
+@media(max-width:680px) {
+  .header {min-height:0;padding-top:10px;flex-wrap:wrap;gap:9px}
+  .header nav {order:3;width:100%;justify-content:center;border-top:1px solid var(--line);padding:9px 0;gap:clamp(9px,4vw,20px);font-size:.875rem}
+  .brand img {height:60px}
+  .hero {grid-template-columns:1fr;min-height:0}
+  .hero h1 {font-size:clamp(3.1rem,12vw,5rem)}
+  .hero-photo {aspect-ratio:4/3}
+}
+@media(max-width:620px) {
+  .photos a:nth-child(2) {aspect-ratio:4/3}
+}
