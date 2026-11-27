@@ -1,0 +1,6 @@
+services:
+  - type: web
+    runtime: static
+    name: bella-liz-festas
+    buildCommand: "test -f public/index.html"
+    staticPublishPath: ./public
