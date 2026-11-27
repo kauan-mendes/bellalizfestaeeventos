@@ -17,3 +17,22 @@
   .calendar button span { display:none }
   .calendar button { min-height:42px }
 }
+
+#booking-filters {display:flex;flex-wrap:wrap;align-items:end;gap:12px;margin:16px 0}
+#booking-filters > label {flex:1 1 150px;max-width:250px;font-weight:700}
+#booking-filters select {display:block;width:100%;min-height:42px;border:1px solid var(--line);border-radius:8px;background:white;color:var(--ink);padding:8px;font:inherit}
+#list {display:grid;gap:12px;margin-top:16px}
+.booking-row {padding:16px;border:1px solid var(--line);border-radius:14px;background:#fffefa}
+.booking-heading,.booking-actions {display:flex;align-items:center;flex-wrap:wrap;gap:9px}
+.booking-heading {justify-content:space-between}
+.booking-heading h3 {font-size:1.2rem;font-weight:800}
+.booking-date {font-weight:700;margin-block:3px}
+.booking-status {padding:3px 10px;border-radius:999px;font-size:.875rem;font-weight:700;background:#e9e7e4;color:#484241}
+.status-pending {background:#ffecb0;color:#5c3e00}
+.status-confirmed {background:#ddf5e2;color:#174727}
+.status-blocked {background:#e8dffd;color:#493070}
+.booking-actions {margin-top:9px}
+.booking-actions .action-confirm {background:#185537;color:white}
+.booking-actions .action-danger {background:#fff0ef;border-color:#a83434;color:#802a2a}
+.booking-actions .action-neutral {border-color:var(--ink)}
+.booking-actions button:hover:not(:disabled) {text-decoration:underline}

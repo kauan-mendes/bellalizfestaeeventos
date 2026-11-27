@@ -14,6 +14,10 @@ let chosen;
 let user;
 let admin;
 let availabilityCall = 0;
+let requestCall = 0;
+const updating = new Set();
+const filters = byId("booking-filters");
+const listNotice = byId("list-notice");
 
 function selectDate(key) {
   chosen = key;
@@ -110,41 +114,130 @@ submit('signup',async ({email,password,name,phone},form)=>{
 });
 byId('logout').onclick=async()=>{const {error}=await db.auth.signOut();notice.textContent=error?'Não foi possível sair.':'';};
 
-async function loadRequests() {
-  if (!user) return;
-  const container=byId('list');
-  container.replaceChildren();
-  const {data,error}=await db.from('booking_requests').select('*').order('event_date');
-  if(!user) return;
-  if(error || !data.length){
-    container.textContent=error?'Não foi possível carregar as solicitações.':'Nenhuma solicitação ainda.';
-    return;
-  }
-  const statuses={pending:'Pendente',confirmed:'Confirmada',declined:'Recusada ou encerrada',blocked:'Bloqueada'};
-  for(const entry of data){
-    const row=document.createElement('article');
-    row.className='booking-row';
-    const detail=document.createElement('p');
-    detail.textContent=[dateLabel(entry.event_date),entry.event_type,statuses[entry.status],...(admin && entry.status!=='blocked' ? [entry.contact_name,entry.phone,entry.guests+' convidados'] : [])].join(' · ');
-    row.append(detail);
-    const actions=entry.status==='pending' ? [['Confirmar','confirmed'],['Recusar','declined']] : [['Liberar data','declined']];
-    if(admin && entry.status!=='declined'){
-      for(const [label,status] of actions){
-        const button=document.createElement('button');
-        button.className='button outline';
-        button.textContent=label;
-        button.onclick=async()=>{
-          button.disabled=true;
-          const {data: updated,error}=await db.from('booking_requests').update({status}).eq('id',entry.id).eq('status',entry.status).select('id');
-          notice.textContent=error?.code==='23505'?'Já existe uma reserva ou bloqueio nessa data.':error||!updated?.length?'A alteração não pôde ser salva.':'Agenda atualizada.';
-          await Promise.all([loadRequests(),renderCalendar()]);
-        };
-        row.append(button);
-      }
+const statuses = {
+  pending: 'Pendente',
+  confirmed: 'Confirmada',
+  declined: 'Recusada ou encerrada',
+  blocked: 'Bloqueada'
+};
+const bookingActions = {
+  pending: [
+    { label: 'Confirmar evento', status: 'confirmed', tone: 'confirm' },
+    { label: 'Recusar pedido', status: 'declined', tone: 'danger', prompt: 'Recusar este pedido?' }
+  ],
+  confirmed: [
+    { label: 'Cancelar evento', status: 'declined', tone: 'danger', prompt: 'Cancelar este evento e liberar a data?' }
+  ],
+  blocked: [
+    { label: 'Remover bloqueio', status: 'declined', tone: 'neutral', prompt: 'Remover o bloqueio e liberar a data?' }
+  ]
+};
+
+async function updateBooking(entry, action) {
+  if (updating.has(entry.id)) return;
+  if (action.prompt && !window.confirm(action.prompt)) return;
+  updating.add(entry.id);
+  try {
+    for (const button of byId('list').querySelectorAll('[data-booking-id]')) {
+      if (button.dataset.bookingId === entry.id) button.disabled = true;
     }
-    container.append(row);
+    const {data, error} = await db.from('booking_requests')
+      .update({status: action.status}).eq('id', entry.id).eq('status', entry.status).select('id');
+    if (error?.code === '23505') {
+      listNotice.textContent = 'Esta data já tem um evento confirmado ou um bloqueio.';
+    } else if (error || !data?.length) {
+      listNotice.textContent = 'Não foi possível salvar. A solicitação pode ter sido alterada.';
+    } else {
+      listNotice.textContent = {
+        pending: action.status === 'confirmed' ? 'Evento confirmado.' : 'Pedido recusado.',
+        confirmed: 'Evento cancelado. A data foi liberada.',
+        blocked: 'Bloqueio removido. A data foi liberada.'
+      }[entry.status];
+    }
+  } catch {
+    listNotice.textContent = 'Falha de conexão. Confira o status antes de tentar novamente.';
+  } finally {
+    updating.delete(entry.id);
+    await Promise.all([loadRequests(), renderCalendar()]);
   }
 }
+
+function bookingCard(entry, canManage) {
+  const row = document.createElement('article');
+  row.className = 'booking-row';
+  const heading = document.createElement('div');
+  heading.className = 'booking-heading';
+  const title = document.createElement('h3');
+  title.textContent = entry.event_type;
+  const badge = document.createElement('span');
+  badge.className = 'booking-status status-' + entry.status;
+  badge.textContent = statuses[entry.status] ?? entry.status;
+  heading.append(title, badge);
+  const date = document.createElement('p');
+  date.className = 'booking-date';
+  date.textContent = dateLabel(entry.event_date) + ' · 10h às 21h';
+  row.append(heading, date);
+
+  if (canManage && entry.status !== 'blocked') {
+    const contact = document.createElement('p');
+    contact.textContent = [entry.contact_name, entry.phone, entry.guests + ' convidados'].join(' · ');
+    row.append(contact);
+  }
+
+  const actions = canManage ? bookingActions[entry.status] : undefined;
+  if (actions) {
+    const controls = document.createElement('div');
+    controls.className = 'booking-actions';
+    for (const action of actions) {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'button booking-action action-' + action.tone;
+      button.textContent = action.label;
+      button.dataset.bookingId = entry.id;
+      button.disabled = updating.has(entry.id);
+      button.onclick = () => updateBooking(entry, action);
+      controls.append(button);
+    }
+    row.append(controls);
+  }
+  return row;
+}
+
+async function loadRequests() {
+  const call = ++requestCall;
+  const activeId = user?.id;
+  if (!activeId) return;
+  const canManage = admin;
+  const container = byId('list');
+  const {from, to, status} = values(filters);
+  if (canManage && from && to && from > to) {
+    container.removeAttribute('aria-busy');
+    container.textContent = 'A data final precisa ser igual ou posterior à inicial.';
+    return;
+  }
+  container.setAttribute('aria-busy', 'true');
+  let query = db.from('booking_requests').select('*').order('event_date').order('created_at').order('id');
+  if (canManage) {
+    if (from) query = query.gte('event_date', from);
+    if (to) query = query.lte('event_date', to);
+    if (status) query = query.eq('status', status);
+  }
+  const {data, error} = await query;
+  if (call !== requestCall || user?.id !== activeId) return;
+  container.removeAttribute('aria-busy');
+  if (error || !data?.length) {
+    container.textContent = error ? 'Não foi possível carregar as solicitações.' : 'Nenhuma solicitação encontrada.';
+    return;
+  }
+  const unique = new Map(data.map((entry) => [entry.id, entry]));
+  const cards = document.createDocumentFragment();
+  for (const entry of unique.values()) cards.append(bookingCard(entry, canManage));
+  container.replaceChildren(cards);
+}
+
+filters.addEventListener('submit', (event) => event.preventDefault());
+filters.addEventListener('change', loadRequests);
+filters.addEventListener('reset', () => setTimeout(loadRequests, 0));
 
 async function saveRequest(entry) {
   if(!chosen) return;
@@ -159,10 +252,13 @@ db.auth.onAuthStateChange((_event,session)=>{
   setTimeout(async()=>{
     user=session?.user;
     admin=false;
+    requestCall++;
     byId('auth').hidden=Boolean(user);
     byId('account').hidden=!user;
     byId('requests').hidden=!user;
-    byId('block').hidden=true;
+    byId('admin-tools').hidden=true;
+    byId('list').removeAttribute('aria-busy');
+    listNotice.textContent='';
     byId('list').replaceChildren();
     if(!user) return;
     const activeId=user.id;
@@ -171,7 +267,7 @@ db.auth.onAuthStateChange((_event,session)=>{
     const {data}=await db.rpc('booking_is_admin');
     if (user?.id !== activeId) return;
     admin=data===true;
-    byId('block').hidden=!admin;
+    byId('admin-tools').hidden=!admin;
     byId('list-title').textContent=admin?'Painel de reservas':'Minhas solicitações';
     loadRequests();
   },0);
